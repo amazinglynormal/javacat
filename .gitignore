@@ -21,3 +21,5 @@ gradle-app.setting
 .classpath
 
 .idea/
+test-a.txt
+test-b.txt
