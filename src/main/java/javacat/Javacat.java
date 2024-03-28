@@ -13,17 +13,9 @@ public class Javacat {
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd;
 
-        Set<String> catOptions = new HashSet<>();
         try {
             cmd = parser.parse(options, args);
-            if (cmd.hasOption("n")) {
-                catOptions.add("n");
-            }
-            if (cmd.hasOption("b")) {
-                catOptions.add("b");
-                catOptions.remove("n");
-            }
-            cat(args, catOptions);
+            cat(cmd);
         } catch (ParseException ex) {
             ex.getMessage();
         }
@@ -31,35 +23,40 @@ public class Javacat {
 
     private static Options getOptions() {
         Options options = new Options();
-        options.addOption("A", "show-all", false, "equivalent to -vET");
         options.addOption("b", "number-nonblank", false, "number nonempty output lines, overrides -n");
-        options.addOption("e", false, "equivalent to -vE");
         options.addOption("E", "show-ends", false, "display $ at end of each line");
         options.addOption("n", "number",false, "number all output lines");
         options.addOption("s", "squeeze-blank", false, "suppress repeated empty output lines");
-        options.addOption("t", false, "equivalent to -vT");
-        options.addOption("T", "show-tabs", false, "display TAB characters as ^I");
-        options.addOption("v", "show-nonprinting", false, "use ^ and M- notation, except for LFD and TAB");
         return options;
     }
 
-    private static void cat(String[] args, Set<String> catOptions) {
-        String file = catOptions.isEmpty() ? args[0] : args[1];
-        try(Scanner scanner = new Scanner(new File(file))) {
-            int lineNumber = 1;
-            while (scanner.hasNext()) {
-                String line = scanner.nextLine();
-                if (catOptions.contains("n")) {
-                    System.out.print(lineNumber);
-                    if (!line.isBlank()) {
-                        System.out.print(" ");
+    private static void cat(CommandLine cmd) {
+        String[] files = cmd.getArgs();
+
+        for (String file: files) {
+            try (Scanner scanner = new Scanner(new File(file))) {
+                String prevLine = "prevline";
+                String currLine;
+
+                int lineNumber = 1;
+                while (scanner.hasNext()) {
+                    currLine = scanner.nextLine();
+                    if (cmd.hasOption("s") && currLine.isBlank() && prevLine.isBlank()) {
+                        continue;
                     }
+                    if ((cmd.hasOption("b") && !currLine.isBlank()) || cmd.hasOption("n")) {
+                        System.out.print(lineNumber);
+                        if (!currLine.isBlank()) {
+                            System.out.print(" ");
+                        }
+                    }
+                    System.out.println(cmd.hasOption("E") ? currLine + "$" : currLine);
+                    lineNumber++;
+                    prevLine = currLine;
                 }
-                System.out.println(line);
-                lineNumber++;
+            } catch (FileNotFoundException ex) {
+                ex.getMessage();
             }
-        } catch (FileNotFoundException ex) {
-            ex.getMessage();
         }
     }
 }
