@@ -33,12 +33,12 @@ public class Javacat {
     private static void cat(CommandLine cmd) {
         String[] files = cmd.getArgs();
 
+        int lineNumber = 1;
         for (String file: files) {
             try (Scanner scanner = new Scanner(new File(file))) {
                 String prevLine = "prevline";
                 String currLine;
 
-                int lineNumber = 1;
                 while (scanner.hasNext()) {
                     currLine = scanner.nextLine();
                     if (cmd.hasOption("s") && currLine.isBlank() && prevLine.isBlank()) {
