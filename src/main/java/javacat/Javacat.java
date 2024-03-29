@@ -49,9 +49,9 @@ public class Javacat {
                         if (!currLine.isBlank()) {
                             System.out.print(" ");
                         }
+                        lineNumber++;
                     }
                     System.out.println(cmd.hasOption("E") ? currLine + "$" : currLine);
-                    lineNumber++;
                     prevLine = currLine;
                 }
             } catch (FileNotFoundException ex) {
